@@ -1,13 +1,14 @@
 // Inställningar för servern
 const Hapi = require('@hapi/hapi');
-const Mongooses = require('mongoose');
+const Mongoose = require('mongoose');
 require('dotenv').config();
+const auth = require('./auth');    // Hämta auth-filen
 
 // Initierar servern
 const init = async () => {
 
     const server = Hapi.server({
-        port: process.env.PORT || 3000,
+        port: process.env.PORT || 5000,
         host: 'localhost',       // för att lyssna på alla IP-adresser: host: '0.0.0.0'
         routes: {
             // Vilka domäner som tillåts, tillåta cookies, tidsbegräning på cookies och headers
@@ -26,6 +27,9 @@ const init = async () => {
     }).catch((error) => {
         console.error("Fel vid anslutning till databas: " + error);
     });
+
+    // Registrera autentisiernings strategin
+    await auth.register(server);
 
     // Routes
     require("./routes/review.route")(server);
