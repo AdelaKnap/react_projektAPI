@@ -105,13 +105,12 @@ exports.loginUser = async (request, h) => {
         const token = generateToken(user);  // Skapa token
 
         // Skicka med användardata 
-        return h
-            .response({
-                message: "Du har loggats in",
-                user: user,
-            })
-            .state('jwt', token);
-
+        return h.response({
+            message: "Du har loggats in"
+            // user: user,
+        })
+        .state('jwt', token);
+        
     } catch (err) {
         console.error(err);
         return h.response({ message: err.message }).code(500);

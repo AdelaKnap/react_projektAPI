@@ -8,7 +8,7 @@ const auth = require('./auth');    // Hämta auth-filen
 const init = async () => {
 
     const server = Hapi.server({
-        port: process.env.PORT || 5000,
+        port: process.env.PORT || 3000,
         host: 'localhost',       // för att lyssna på alla IP-adresser: host: '0.0.0.0'
         routes: {
             // Vilka domäner som tillåts, tillåta cookies, tidsbegräning på cookies och headers
