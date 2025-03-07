@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 // Controller-fil för recensioner
 
 // Modellen
@@ -6,14 +7,10 @@ const Review = require("../models/review.model");
 // Hämta alla recensioner
 exports.getAllReviews = async (request, h) => {
 
-    // const { bookId } = request.query;       // bookId
-
-    // if (!bookId) {
-    //     return h.response({ error: "bookId krävs" }).code(400);
-    // }
-
     try {
-        const reviews = await Review.find().populate("userId", "username"); // Hämta användarnamn
+        // Hitta recensioner utifrån bookId
+        const reviews = await Review.find().populate("userId", "username");
+
         if (reviews.length === 0) {
             return h.response("Inga recensioner hittades.").code(404);
         }
@@ -22,6 +19,49 @@ exports.getAllReviews = async (request, h) => {
         return h.response({ error: err.message }).code(500);
     }
 };
+
+// Hämta alla recensioner utifrån bok
+exports.getReviewsByBook = async (request, h) => {
+
+    const { bookId } = request.query;       // bookId
+
+    try {
+        // Hitta recensioner utifrån bookId
+        const reviews = await Review.find({ bookId }).populate("userId", "username");
+
+        if (reviews.length === 0) {
+            return h.response([]).code(200);
+        }
+
+        return h.response(reviews).code(200);
+
+    } catch (err) {
+        return h.response({ error: err.message }).code(500);
+    }
+};
+
+// Hämta alla recensioner för inloggad användare
+exports.getReviewsByUser = async (request, h) => {
+
+    if (!request.auth.isAuthenticated) {
+        return h.response({ error: "Ej autentiserad" }).code(401);
+    }
+
+    try {
+        const userId = request.auth.credentials.user._id;        // Hämtar userId från den inloggade användaren
+
+        const reviews = await Review.find({ userId });
+
+        if (!reviews.length) {
+            return h.response("Inga recensioner hittades för denna användare.").code(404);
+        }
+
+        return reviews;
+    } catch (err) {
+        return h.response({ error: err.message }).code(500);
+    }
+};
+
 
 // Hämta en recension utifrån ID
 exports.getOneReview = async (request, h) => {
@@ -48,19 +88,21 @@ exports.updateReview = async (request, h) => {
     try {
         const { id } = request.params;
         const updates = request.payload;
-        // const userId = request.auth.credentials.id;         // Id från inloggad användare
 
-        // Kontroll att recensionen finns och att det är rätt användare
-        // const review = await Review.findOneAndUpdate(
-        //     { _id: id, userId: userId },
-        //     updates, { new: true }
-        // );
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return h.response({ error: "Ogiltigt ObjectId-format" }).code(400);
+        }
 
-        const review = await Review.findByIdAndUpdate(id, updates, { new: true });
+        const updatedReview = await Review.findOneAndUpdate(
+            { _id: id },
+            updates,
+            { new: true, runValidators: true }
+        );
 
-        if (!review) return h.response("Recensionen hittades inte eller fel behörighet").code(404);
 
-        return h.response(review).code(200);
+        if (!updatedReview) return h.response("Recensionen hittades inte.").code(404);
+
+        return h.response(updatedReview).code(200);
     } catch (err) {
         return h.response({ error: err.message }).code(500);
     }
@@ -69,16 +111,15 @@ exports.updateReview = async (request, h) => {
 // Ta bort en recension (bara egen recensioner)
 exports.deleteReview = async (request, h) => {
     try {
-        const review = await Review.findById(request.params.id);
-        if (!review) return h.response("Recensionen hittades inte").code(404);
+        const { id } = request.params;
 
-        // Kontroll om korrekt användare
-        // if (review.userId.toString() !== request.auth.credentials.id) {
-        //     return h.response("Du kan bara ta bort dina egna recensioner").code(403);
-        // }
+        const review = await Review.findOneAndDelete({ _id: id });
 
-        await review.deleteOne();
-        return h.response({ message: "Recension raderad" }).code(204);
+        if (!review) {
+            return h.response("Recensionen hittades inte.").code(404);
+        }
+
+        return h.response({ message: "Recension borttagen" }).code(200);
     } catch (err) {
         return h.response({ error: err.message }).code(500);
     }

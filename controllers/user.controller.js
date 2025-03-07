@@ -106,8 +106,8 @@ exports.loginUser = async (request, h) => {
 
         // Skicka med användardata 
         return h.response({
-            message: "Du har loggats in"
-            // user: user,
+            message: "Du har loggats in",
+            user: user,
         })
         .state('jwt', token);
         
