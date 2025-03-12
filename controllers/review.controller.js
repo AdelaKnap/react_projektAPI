@@ -62,7 +62,6 @@ exports.getReviewsByUser = async (request, h) => {
     }
 };
 
-
 // Hämta en recension utifrån ID
 exports.getOneReview = async (request, h) => {
     try {
