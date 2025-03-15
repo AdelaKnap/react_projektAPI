@@ -54,7 +54,6 @@ module.exports = (server) => {
             path: "/reviews",
             handler: reviewController.addNewReview,
             options: {
-                auth: false,
                 validate: {
                     payload: reviewValidation,
                     failAction: (request, h, err) => {
@@ -68,7 +67,6 @@ module.exports = (server) => {
             path: "/reviews/{id}",
             handler: reviewController.updateReview,
             options: {
-                auth: false,
                 validate: {
                     payload: reviewValidation,
                     failAction: (request, h, err) => {
@@ -81,9 +79,6 @@ module.exports = (server) => {
             method: "DELETE",
             path: "/reviews/{id}",
             handler: reviewController.deleteReview,
-            options: {
-                auth: false,
-            }
         }
     ]);
 };
