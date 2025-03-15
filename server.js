@@ -9,7 +9,7 @@ const init = async () => {
 
     const server = Hapi.server({
         port: process.env.PORT || 5000,
-        host: 'localhost',       // för att lyssna på alla IP-adresser: host: '0.0.0.0', lokalt host: 'localhost'
+        host: '0.0.0.0',       // för att lyssna på alla IP-adresser: host: '0.0.0.0', lokalt host: 'localhost'
         routes: {
             // Vilka domäner som tillåts, tillåta cookies, tidsbegräning på cookies och headers
             cors: {
